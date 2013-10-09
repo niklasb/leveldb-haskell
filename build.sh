@@ -15,5 +15,5 @@ cd $LEVELDB_HOME
 export LIBRARY_PATH=$SNAPPY_HOME
 export C_INCLUDE_PATH=$SNAPPY_HOME
 export CPLUS_INCLUDE_PATH=$SNAPPY_HOME
-make libleveldb.a
+make 
 

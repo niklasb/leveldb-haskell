@@ -60,14 +60,15 @@ library
                   , resourcet > 0.3.2
                   , transformers
                   , process
+                  , temporary
 
-  ghc-options:      -Wall -rtsopts -funbox-strict-fields 
+  ghc-options:      -Wall -rtsopts -funbox-strict-fields
   ghc-prof-options: -prof -auto-all
 
   hs-source-dirs:   src
 
   include-dirs:     3rd_party/leveldb/include
-  ld-options:       3rd_party/leveldb/libleveldb.a
+  extra-libraries:  stdc++
 
 executable leveldb-example-comparator
   main-is:          comparator.hs
