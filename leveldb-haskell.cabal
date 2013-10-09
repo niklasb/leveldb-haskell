@@ -27,7 +27,7 @@ description:
     v0.1.0 of this library, LevelDB is no longer bundled and must be installed
     on the target system (version 1.7 or greater is required).
 
-extra-source-files:  Readme.md, AUTHORS, examples/*.hs
+extra-source-files:  Readme.md, AUTHORS, examples/*.hs, build.sh
 
 source-repository head
   type:     git
