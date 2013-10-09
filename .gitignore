@@ -5,3 +5,5 @@ tags
 *.swp
 *.a
 *.hi
+3rd_party/**/*
+Setup
