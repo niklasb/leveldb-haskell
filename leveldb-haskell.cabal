@@ -60,12 +60,13 @@ library
                   , resourcet > 0.3.2
                   , transformers
 
-  ghc-options:      -Wall -O -rtsopts -funbox-strict-fields
+  ghc-options:      -Wall -O -rtsopts -funbox-strict-fields 
   ghc-prof-options: -prof -auto-all
 
   hs-source-dirs:   src
 
-  extra-libraries:  leveldb
+  include-dirs:     3rd_party/leveldb/include
+  ld-options:       3rd_party/leveldb/libleveldb.a
 
 executable leveldb-example-comparator
   main-is:          comparator.hs
