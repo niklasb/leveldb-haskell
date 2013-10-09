@@ -33,24 +33,19 @@ Prerequisites:
 
 * [GHC 7.*](http://www.haskell.org/ghc)
 * [Cabal](http://www.haskell.org/cabal), version 1.3 or higher
-* [LevelDB](http://code.google.com/p/leveldb)
-* Optional: [Snappy](http://code.google.com/p/snappy),
-  if compression support is desired
-
-**Note:** as of version 1.3, LevelDB can be built as a shared library. Thus, as
-of version 0.1.0 of this library, LevelDB is no longer bundled and must be
-installed on the target system.
-
-To install the latest version from hackage:
-
-```shell
-$ cabal install leveldb-haskell
-```
 
 To install from checked-out source:
 
 ```shell
+$ ./get.sh
+$ cabal configure
 $ cabal install
+```
+
+To create a source Cabal package for distribution:
+
+```
+$ runghc ./Setup.sh sdist
 ```
 
 ## Notes
