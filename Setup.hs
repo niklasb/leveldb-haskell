@@ -5,6 +5,7 @@ import Distribution.Simple.InstallDirs hiding (absoluteInstallDirs)
 import Distribution.Simple.LocalBuildInfo
 import Distribution.Simple.Setup
 import System.Cmd
+import System.Exit
 import System.Directory
 import System.FilePath
 import System.IO.Temp
@@ -30,6 +31,10 @@ extraObjFiles =
   , "3rd_party/snappy/snappy-stubs-internal.o"
   ]
 
+failExitCode :: ExitCode -> IO ()
+failExitCode ExitSuccess = return ()
+failExitCode (ExitFailure i) = fail ("Subcommand failed with exit code " ++ show i)
+
 concatObjs :: [FilePath] -> FilePath -> IO ()
 concatObjs fps outp =
     withSystemTempDirectory "leveldb-haskell" $ \tmpDir ->
@@ -40,13 +45,13 @@ concatObjs fps outp =
           do let ext = takeExtension inp
              case ext of
                 ".o" -> copyFile inp (tmpDir </> takeFileName inp)
-                ".a" -> void $ rawSystem "ar" ["x", inp]
+                ".a" -> rawSystem "ar" ["x", inp] >>= failExitCode
        objFiles <- liftM (filter (`notElem` [".",".."]))
                            (getDirectoryContents ".")
        let target = base </> outp
        replace <- doesFileExist target
        when replace $ removeFile target
-       void $ rawSystem "ar" ("rcs" : (base </> outp) : objFiles)
+       rawSystem "ar" ("rcs" : (base </> outp) : objFiles) >>= failExitCode
        setCurrentDirectory base
 
 main = defaultMainWithHooks
@@ -58,7 +63,7 @@ main = defaultMainWithHooks
     origSDistHook = sDistHook simpleUserHooks
     mySDistHook pkgDesc mLocBuildInfo hooks flags =
       do putStrLn "Fetching Snappy and LevelDB source files"
-         void $ system "bash get.sh"
+         system "bash get.sh" >>= failExitCode
          let processSrcDir dir =
                  do sub <- filesInDirRec dir
                     return $ map (dir</>) sub
@@ -67,7 +72,7 @@ main = defaultMainWithHooks
                    extraSrcFiles = extraSrcFiles pkgDesc ++ files }
          origSDistHook newPkgDesc mLocBuildInfo hooks flags
     makeLevelDb _ _ =
-      do void $ system "bash build.sh"
+      do system "bash build.sh" >>= failExitCode
          return (Nothing, [])
     myPostInst _ iflags pkgDesc lbi =
       do let installDirTmps = installDirTemplates lbi
