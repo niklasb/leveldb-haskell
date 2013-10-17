@@ -1,0 +1,12 @@
+--- autogen.sh	2013-10-17 15:49:07.590406766 +0200
++++ autogen.sh	2013-10-17 15:51:52.245447965 +0200
+@@ -2,6 +2,8 @@
+ rm -rf autom4te.cache
+ aclocal -I m4
+ autoheader
+-libtoolize --copy
++LIBTOOLIZE=libtoolize
++which $LIBTOOLIZE >/dev/null 2>&1 || LIBTOOLIZE=glibtoolize
++$LIBTOOLIZE --copy
+ automake --add-missing --copy
+ autoconf
