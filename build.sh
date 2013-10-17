@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+set -e
 
 ROOT=`dirname $0`
 cd $ROOT
@@ -15,5 +16,5 @@ cd $LEVELDB_HOME
 export LIBRARY_PATH=$SNAPPY_HOME
 export C_INCLUDE_PATH=$SNAPPY_HOME
 export CPLUS_INCLUDE_PATH=$SNAPPY_HOME
+echo "echo \"PLATFORM_SHARED_EXT=\" >> \$OUTPUT" >> build_detect_platform
 make 
-
