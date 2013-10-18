@@ -77,7 +77,6 @@ main = defaultMainWithHooks
     myPostInst _ iflags pkgDesc lbi =
       do let installDirTmps = installDirTemplates lbi
              libd = libdir installDirTmps
-             prefix = fromFlag $ installDistPref iflags
              instLibDir = libdir $ absoluteInstallDirs pkgDesc lbi
                               (fromFlag $ copyDest defaultCopyFlags)
          entries <- getDirectoryContents instLibDir
