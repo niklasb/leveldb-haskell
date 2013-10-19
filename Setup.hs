@@ -1,4 +1,5 @@
 import Control.Monad
+import Control.Exception
 import Distribution.PackageDescription
 import Distribution.Simple
 import Distribution.Simple.InstallDirs hiding (absoluteInstallDirs)
@@ -35,24 +36,44 @@ failExitCode :: ExitCode -> IO ()
 failExitCode ExitSuccess = return ()
 failExitCode (ExitFailure i) = fail ("Subcommand failed with exit code " ++ show i)
 
+listObjFiles :: FilePath -> IO [FilePath]
+listObjFiles dir =
+    liftM (filter (\fp -> takeExtension fp `elem` [".o", ".p_o"]))
+          (getDirectoryContents dir)
+
+withDir :: FilePath -> (FilePath -> IO a) -> IO a
+withDir dir action =
+    bracket (do this <- getCurrentDirectory
+                setCurrentDirectory dir
+                return this)
+            setCurrentDirectory
+            action
+
+extractAr :: FilePath -> FilePath -> IO ()
+extractAr arFile destDir =
+    let arBase = takeBaseName arFile
+    in withSystemTempDirectory arBase $ \tmpDir ->
+       withDir tmpDir $ \base ->
+               do rawSystem "ar" ["x", arFile] >>= failExitCode
+                  objFiles <- listObjFiles "."
+                  forM_ objFiles $ \obj ->
+                      copyFile obj (destDir </> (arBase ++ "__" ++ obj))
+
 concatObjs :: [FilePath] -> FilePath -> IO ()
 concatObjs fps outp =
     withSystemTempDirectory "leveldb-haskell" $ \tmpDir ->
-    do base <- getCurrentDirectory
-       let paths = map (base</>) fps
-       setCurrentDirectory tmpDir
+    withDir tmpDir $ \base ->
+    do let paths = map (base</>) fps
        forM_ paths $ \inp ->
           do let ext = takeExtension inp
              case ext of
                 ".o" -> copyFile inp (tmpDir </> takeFileName inp)
-                ".a" -> rawSystem "ar" ["x", inp] >>= failExitCode
-       objFiles <- liftM (filter (`notElem` [".",".."]))
-                           (getDirectoryContents ".")
+                ".a" -> extractAr inp tmpDir
+       objFiles <- listObjFiles "."
        let target = base </> outp
        replace <- doesFileExist target
        when replace $ removeFile target
-       rawSystem "ar" ("rcs" : (base </> outp) : objFiles) >>= failExitCode
-       setCurrentDirectory base
+       rawSystem "ar" ("rcs" : target : objFiles) >>= failExitCode
 
 main = defaultMainWithHooks
            (simpleUserHooks { preBuild = makeLevelDb
